@@ -21,13 +21,13 @@
             <Font size="20.0" />
         </font>
     </Label>
-    <Button fx:id="btn_signUp" layoutX="340.0" layoutY="382.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="153.0" style="-fx-cursor: hand;" text="Sign up">
+    <Button layoutX="340.0" layoutY="382.0" mnemonicParsing="false" onAction="#signUp" prefHeight="27.0" prefWidth="153.0" style="-fx-cursor: hand;" text="Sign up">
         <font>
             <Font size="13.0" />
         </font>
     </Button>
     <TextField fx:id="username" layoutX="340.0" layoutY="234.0" promptText="Username" />
-    <TextField fx:id="mail" layoutX="340.0" layoutY="311.0" promptText="example@gmail.com" />
+    <TextField fx:id="email" layoutX="340.0" layoutY="311.0" promptText="example@gmail.com" />
     <PasswordField fx:id="password" layoutX="340.0" layoutY="274.0" promptText="Password" />
     <Label layoutX="190.0" layoutY="236.0" text="Username" textFill="WHITE">
         <font>

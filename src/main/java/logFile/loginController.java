@@ -6,6 +6,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
+import java.sql.SQLException;
+
 import static logFile.utils.changeScene;
 
 
@@ -29,7 +31,13 @@ void setBtn_forgot(ActionEvent event) {
 }
 
 @FXML
-void setBtn_login(ActionEvent event) {
+void setBtn_login(ActionEvent event) throws SQLException {
+    if(username.getText().trim().isEmpty() || password.getText().trim().isEmpty())
+    {
+        System.out.println("Please fill all the fields");
+        massage.setText("Please fill all the fields");}
+    else
+     utils.login(event,username.getText(),password.getText());
 
     }
 }
