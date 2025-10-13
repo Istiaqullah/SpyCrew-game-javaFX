@@ -1,4 +1,4 @@
-package logFile;
+package Log;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

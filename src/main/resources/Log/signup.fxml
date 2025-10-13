@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="470.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="logFile.signupController">
+<AnchorPane prefHeight="470.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Log.signupController">
 <children>
     <ImageView fitHeight="500.0" fitWidth="850.0" pickOnBounds="true" preserveRatio="true">
         <image>

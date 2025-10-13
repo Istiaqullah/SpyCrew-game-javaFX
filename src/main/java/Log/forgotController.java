@@ -1,13 +1,18 @@
-package logFile;
+package Log;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
-public class VerificationController {
+public class forgotController {
+
     @FXML
     void logIn(ActionEvent event)
     {
         utils.changeScene(event,"login.fxml",null,null);
 
     }
+
+
+
+
 }

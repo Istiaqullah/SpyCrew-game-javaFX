@@ -1,10 +1,10 @@
-package logFile;
+package Log;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
 import java.io.IOException;
 public class Main extends Application {
     @Override
@@ -15,6 +15,7 @@ public class Main extends Application {
         stage.setTitle("SpyCrew");
         stage.resizableProperty().setValue(false);
         stage.setScene(scene);
+        scene.getRoot().requestFocus(); // Set focus to the root node
         stage.show();
 
     }

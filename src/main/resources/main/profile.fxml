@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="500.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.profileController">
+    <children>
+        <Label fx:id="name" layoutX="41.0" layoutY="35.0" text="Name: ">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+        <Label fx:id="point" layoutX="41.0" layoutY="63.0" text="Point: " />
+        <Label layoutX="135.0" layoutY="112.0" text="History">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+        <Label layoutX="674.0" layoutY="112.0" text="Room">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Label>
+        <ScrollPane layoutX="50.0" layoutY="132.0" prefHeight="279.0" prefWidth="214.0">
+            <content>
+                <VBox fx:id="historyVBox" prefHeight="273.0" prefWidth="208.0" />
+            </content>
+        </ScrollPane>
+        <ScrollPane layoutX="589.0" layoutY="132.0" prefHeight="279.0" prefWidth="207.0">
+            <content>
+                <VBox fx:id="roomVBox" prefHeight="277.0" prefWidth="204.0" />
+            </content>
+        </ScrollPane>
+        <Button fx:id="startButton" layoutX="687.0" layoutY="418.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="109.0" text="Start" />
+      <ImageView fitHeight="279.0" fitWidth="200.0" layoutX="340.0" layoutY="132.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../img/play.gif" />
+         </image>
+      </ImageView>
+    </children>
+</AnchorPane>

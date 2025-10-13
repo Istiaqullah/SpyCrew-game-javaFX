@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="470.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="logFile.loginController">
+<AnchorPane prefHeight="470.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Log.loginController">
 <children>
     <ImageView fitHeight="500.0" fitWidth="850.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
@@ -45,7 +45,7 @@
             <Font size="13.0" />
         </font>
     </Button>
-    <Button layoutX="361.0" layoutY="431.0" mnemonicParsing="false" onAction="#setBtn_forgot" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Forgot password" textFill="WHITE" underline="true">
+    <Button layoutX="357.0" layoutY="431.0" mnemonicParsing="false" onAction="#setBtn_forgot" style="-fx-background-color: transparent; -fx-cursor: hand;" text="Forgot password" textFill="WHITE" underline="true">
         <font>
             <Font size="13.0" />
         </font>
