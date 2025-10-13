@@ -9,7 +9,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.Group;
 
-public class testMovement {
+public class Movement {
 
     private BooleanProperty wPressed = new SimpleBooleanProperty();
     private BooleanProperty aPressed = new SimpleBooleanProperty();
@@ -34,7 +34,7 @@ public class testMovement {
     private int tile21Value = 21;
 
     private Camera camera;
-    private testMapRender mapRenderer;
+    private MapRender mapRenderer;
 
     private int playerX, playerY; // in tile coordinates
 
@@ -46,10 +46,10 @@ public class testMovement {
     private long lastMoveTime = 0;
 
     public static void setMap(int[][] map) {
-        testMovement.map = map;
+        Movement.map = map;
     }
 
-    public void RunRun(ImageView player, AnchorPane scene, Label name, testMapRender mapRenderer, Camera camera, int initialPlayerX, int initialPlayerY) {
+    public void RunRun(ImageView player, AnchorPane scene, Label name, MapRender mapRenderer, Camera camera, int initialPlayerX, int initialPlayerY) {
         this.player = player;
         this.scene = scene;
         this.name = name;

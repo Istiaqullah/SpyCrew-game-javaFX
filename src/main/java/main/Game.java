@@ -5,12 +5,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class testGame extends Application {
+public class Game extends Application {
    // private Sound backgroundSound;
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader fxmlLoader = new FXMLLoader(testGame.class.getResource("/main/testGame.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Game.class.getResource("/main/Game.fxml"));
         Parent root = fxmlLoader.load();
         stage.setTitle("SpyCrew");
         stage.setScene(new Scene(root, 368, 368)); // Adjust for your tile scaling if needed

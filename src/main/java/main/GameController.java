@@ -8,7 +8,7 @@ import javafx.scene.layout.AnchorPane;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class testGameController implements Initializable {
+public class GameController implements Initializable {
 
     @FXML
     public AnchorPane root;
@@ -19,7 +19,7 @@ public class testGameController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        testMapRender testMapRender = new testMapRender();
+        MapRender MapRender = new MapRender();
         int[][] map;
         try {
            map = mapUtil.fetchMapFromDB();
@@ -27,11 +27,11 @@ public class testGameController implements Initializable {
             throw new RuntimeException(e);
         }
 
-        testMovement.setMap(map);
+        Movement.setMap(map);
 
         int cameraWidth = 12;
         int cameraHeight = 12;
-        int tileSize = testMapRender.TILE_SIZE;
+        int tileSize = MapRender.TILE_SIZE;
         Camera camera = new Camera(cameraWidth, cameraHeight, map[0].length, map.length, tileSize);
 
         int initialPlayerX = map[0].length / 2;
@@ -39,7 +39,7 @@ public class testGameController implements Initializable {
 
         name.setText("Hasnat");
 
-        testMovement testMovement = new testMovement();
-        testMovement.RunRun(image, root, name, testMapRender, camera, initialPlayerX, initialPlayerY);
+        Movement Movement = new Movement();
+        Movement.RunRun(image, root, name, MapRender, camera, initialPlayerX, initialPlayerY);
     }
 }

@@ -9,11 +9,11 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class testMapRender {
+public class MapRender {
     public static final int TILE_SIZE = 32; // 2x scale
     private Image[] tileImages;
 
-    public testMapRender() {
+    public MapRender() {
         tileImages = new Image[23];
         for (int i = 0; i < 23; i++) {
             tileImages[i] = new Image(getClass().getResourceAsStream("/img/Map/tile_" + i + ".png"));
