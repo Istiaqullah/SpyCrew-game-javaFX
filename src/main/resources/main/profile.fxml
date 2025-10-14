@@ -5,20 +5,25 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="500.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.profileController">
+<AnchorPane prefHeight="469.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.profileController">
     <children>
-        <Label fx:id="name" layoutX="41.0" layoutY="35.0" text="Name: ">
+      <ImageView fitHeight="500.0" fitWidth="850.0" layoutY="-6.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../img/profile%20background.png" />
+         </image>
+      </ImageView>
+        <Label fx:id="name" layoutX="542.0" layoutY="21.0" text="Name: " textFill="WHITE">
             <font>
                 <Font size="14.0" />
             </font>
         </Label>
-        <Label fx:id="point" layoutX="41.0" layoutY="63.0" text="Point: " />
-        <Label layoutX="135.0" layoutY="112.0" text="History">
+        <Label fx:id="point" layoutX="541.0" layoutY="47.0" text="Point: " textFill="WHITE" />
+        <Label layoutX="135.0" layoutY="112.0" text="History" textFill="WHITE">
             <font>
                 <Font size="14.0" />
             </font>
         </Label>
-        <Label layoutX="674.0" layoutY="112.0" text="Room">
+        <Label layoutX="674.0" layoutY="223.0" text="Room" textFill="WHITE">
             <font>
                 <Font size="14.0" />
             </font>
@@ -28,16 +33,22 @@
                 <VBox fx:id="historyVBox" prefHeight="273.0" prefWidth="208.0" />
             </content>
         </ScrollPane>
-        <ScrollPane layoutX="589.0" layoutY="132.0" prefHeight="279.0" prefWidth="207.0">
+        <ScrollPane layoutX="589.0" layoutY="244.0" prefHeight="167.0" prefWidth="207.0">
             <content>
-                <VBox fx:id="roomVBox" prefHeight="277.0" prefWidth="204.0" />
+                <VBox fx:id="roomVBox" prefHeight="163.0" prefWidth="204.0" />
             </content>
         </ScrollPane>
-        <Button fx:id="startButton" layoutX="687.0" layoutY="418.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="109.0" text="Start" />
-      <ImageView fitHeight="279.0" fitWidth="200.0" layoutX="340.0" layoutY="132.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../img/play.gif" />
-         </image>
-      </ImageView>
+        <Button fx:id="startButton" layoutX="724.0" layoutY="422.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="72.0" text="Start" />
+        <ImageView fitHeight="279.0" fitWidth="200.0" layoutX="340.0" layoutY="132.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@../img/play.gif" />
+            </image>
+        </ImageView>
+        <!-- Room Management UI -->
+        <Button fx:id="createRoomButton" layoutX="586.0" layoutY="90.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="120.0" text="Create Room" />
+        <TextField fx:id="roomKeyField" layoutX="586.0" layoutY="177.0" prefHeight="30.0" prefWidth="120.0" promptText="Room Key" />
+        <Button fx:id="joinRoomButton" layoutX="720.0" layoutY="177.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="80.0" text="Join Room" />
+        <Button fx:id="leaveRoomButton" layoutX="589.0" layoutY="422.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="120.0" text="Leave Room" />
+        <Label fx:id="roomKeyDisplay" layoutX="586.0" layoutY="132.0" prefHeight="30.0" prefWidth="200.0" text="Room Key: " textFill="WHITE" />
     </children>
 </AnchorPane>

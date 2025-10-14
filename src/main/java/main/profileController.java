@@ -1,12 +1,21 @@
 package main;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
 import java.net.URL;
 import java.sql.*;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
 public class profileController implements Initializable {
 
@@ -20,21 +29,32 @@ public class profileController implements Initializable {
     private VBox roomVBox;
     @FXML
     private Button startButton;
+    @FXML
+    private Button createRoomButton;
+    @FXML
+    private Button joinRoomButton;
+    @FXML
+    private Button leaveRoomButton;
+    @FXML
+    private TextField roomKeyField;
+    @FXML
+    private Label roomKeyDisplay;
 
-    // Set these from your app/session logic
-    private int playerId = 1; // Example: set user id dynamically
+    private int playerId = 1; // You should set this from your login/session logic
+    private Integer roomId = null;
+    private String currentRoomKey = "";
+    private Integer roomCreatorId = null;
+    private Timeline pollingTimeline;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            // Load player profile info
             UserProfile profile = getUserProfile(playerId);
             if (profile != null) {
                 name.setText("Name: " + profile.username);
                 point.setText("Point: " + profile.score);
             }
 
-            // Load game history
             historyVBox.getChildren().clear();
             for (GameHistory gh : getGameHistory(playerId)) {
                 Label historyLabel = new Label(
@@ -45,31 +65,232 @@ public class profileController implements Initializable {
                 historyVBox.getChildren().add(historyLabel);
             }
 
-            // Room logic (unchanged for now)
             roomVBox.getChildren().clear();
-            // (Add your room logic here)
+            if (roomId != null) {
+                for (RoomPlayer rp : getRoomPlayers(roomId)) {
+                    Label roomLabel = new Label(rp.username);
+                    roomVBox.getChildren().add(roomLabel);
+                }
+                roomKeyDisplay.setText("Room Key: " + currentRoomKey);
+            } else {
+                roomKeyDisplay.setText("Room Key: ");
+            }
 
-            // Start button action
+            createRoomButton.setOnAction(e -> createRoom());
+            joinRoomButton.setOnAction(e -> joinRoom());
+            leaveRoomButton.setOnAction(e -> leaveRoom());
             startButton.setOnAction(e -> startGame());
+
+            // Start polling for game start if in a room
+            startPollingForGameStart();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private UserProfile getUserProfile(int userId) throws SQLException {
-        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/spycrew", "root", "Hasnat");
-        PreparedStatement ps = conn.prepareStatement("SELECT username, score FROM users WHERE id = ?");
-        ps.setInt(1, userId);
-        ResultSet rs = ps.executeQuery();
-        UserProfile profile = null;
-        if (rs.next()) {
-            profile = new UserProfile(rs.getString("username"), rs.getInt("score"));
+    // ------------------ Room Management Methods ---------------------
+
+    private void createRoom() {
+        String roomKey = UUID.randomUUID().toString().substring(0, 8); // short random key
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO rooms (room_key, creator_id) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, roomKey);
+            ps.setInt(2, playerId);
+            ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                roomId = rs.getInt(1);
+                currentRoomKey = roomKey;
+                roomCreatorId = playerId;
+                roomKeyDisplay.setText("Room Key: " + currentRoomKey);
+            }
+            rs.close();
+            ps.close();
+
+            PreparedStatement ps2 = conn.prepareStatement("INSERT INTO room_players (room_id, user_id) VALUES (?, ?)");
+            ps2.setInt(1, roomId);
+            ps2.setInt(2, playerId);
+            ps2.executeUpdate();
+            ps2.close();
+
+            refreshRoomPlayers();
+            startPollingForGameStart();
+        } catch (SQLException e) {
+            showAlert("Error", "Could not create room: " + e.getMessage());
         }
-        rs.close();
-        ps.close();
-        conn.close();
-        return profile;
+    }
+
+    private void joinRoom() {
+        String roomKey = roomKeyField.getText().trim();
+        if (roomKey.isEmpty()) {
+            showAlert("Input Error", "Please enter a room key.");
+            return;
+        }
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT id, creator_id FROM rooms WHERE room_key = ?");
+            ps.setString(1, roomKey);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                roomId = rs.getInt("id");
+                roomCreatorId = rs.getInt("creator_id");
+                currentRoomKey = roomKey;
+                roomKeyDisplay.setText("Room Key: " + currentRoomKey);
+
+                PreparedStatement ps2 = conn.prepareStatement("INSERT IGNORE INTO room_players (room_id, user_id) VALUES (?, ?)");
+                ps2.setInt(1, roomId);
+                ps2.setInt(2, playerId);
+                ps2.executeUpdate();
+                ps2.close();
+
+                refreshRoomPlayers();
+                startPollingForGameStart();
+            } else {
+                showAlert("Room Not Found", "No room with this key.");
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            showAlert("Error", "Could not join room: " + e.getMessage());
+        }
+    }
+
+    private void leaveRoom() {
+        if (roomId == null) return;
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("DELETE FROM room_players WHERE room_id = ? AND user_id = ?");
+            ps.setInt(1, roomId);
+            ps.setInt(2, playerId);
+            ps.executeUpdate();
+            ps.close();
+
+            PreparedStatement ps2 = conn.prepareStatement("SELECT creator_id FROM rooms WHERE id = ?");
+            ps2.setInt(1, roomId);
+            ResultSet rs = ps2.executeQuery();
+            if (rs.next() && rs.getInt("creator_id") == playerId) {
+                PreparedStatement ps3 = conn.prepareStatement("DELETE FROM rooms WHERE id = ?");
+                ps3.setInt(1, roomId);
+                ps3.executeUpdate();
+                ps3.close();
+            }
+            rs.close();
+            ps2.close();
+
+            roomId = null;
+            currentRoomKey = "";
+            roomCreatorId = null;
+            roomKeyDisplay.setText("Room Key: ");
+            roomVBox.getChildren().clear();
+            stopPollingForGameStart();
+        } catch (SQLException e) {
+            showAlert("Error", "Could not leave room: " + e.getMessage());
+        }
+    }
+
+    private void startGame() {
+        if (roomId == null) {
+            showAlert("Error", "You are not in a room!");
+            return;
+        }
+        if (playerId != roomCreatorId) {
+            showAlert("Not Allowed", "Only the room creator can start the game!");
+            return;
+        }
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps2 = conn.prepareStatement("UPDATE rooms SET started = TRUE WHERE id = ?");
+            ps2.setInt(1, roomId);
+            ps2.executeUpdate();
+            ps2.close();
+
+            showAlert("Game Started", "Game started for Room: " + currentRoomKey);
+            switchToGameScene();
+        } catch (SQLException e) {
+            showAlert("Error", "Could not start game: " + e.getMessage());
+        }
+    }
+
+    // ------------- Polling for Game Start -------------
+    private void startPollingForGameStart() {
+        if (pollingTimeline != null) {
+            pollingTimeline.stop();
+        }
+        if (roomId == null) return;
+        pollingTimeline = new Timeline(new KeyFrame(Duration.seconds(2), ev -> {
+            if (!isGameStarted()) return;
+            pollingTimeline.stop();
+            switchToGameScene();
+        }));
+        pollingTimeline.setCycleCount(Timeline.INDEFINITE);
+        pollingTimeline.play();
+    }
+
+    private void stopPollingForGameStart() {
+        if (pollingTimeline != null) {
+            pollingTimeline.stop();
+            pollingTimeline = null;
+        }
+    }
+
+    private boolean isGameStarted() {
+        if (roomId == null) return false;
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT started FROM rooms WHERE id = ?");
+            ps.setInt(1, roomId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                boolean started = rs.getBoolean("started");
+                rs.close();
+                ps.close();
+                return started;
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            // Ignore, just keep polling
+        }
+        return false;
+    }
+
+    private void switchToGameScene() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/main/game.fxml"));
+            Parent gameRoot = loader.load();
+            Stage stage = (Stage) name.getScene().getWindow();
+            Scene gameScene = new Scene(gameRoot, 368, 368);
+            gameRoot.requestFocus();
+            stage.setScene(gameScene);
+            stage.setTitle("SpyCrew");
+            stage.show();
+        } catch (Exception e) {
+            showAlert("Error", "Failed to switch to game scene: " + e.getMessage());
+        }
+    }
+
+    private void refreshRoomPlayers() throws SQLException {
+        roomVBox.getChildren().clear();
+        if (roomId != null) {
+            for (RoomPlayer rp : getRoomPlayers(roomId)) {
+                Label roomLabel = new Label(rp.username);
+                roomVBox.getChildren().add(roomLabel);
+            }
+        }
+    }
+
+    // --------------- Helper Methods -------------------
+
+    private UserProfile getUserProfile(int userId) throws SQLException {
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT username, score FROM users WHERE id = ?");
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            UserProfile profile = null;
+            if (rs.next()) {
+                profile = new UserProfile(rs.getString("username"), rs.getInt("score"));
+            }
+            rs.close();
+            ps.close();
+            return profile;
+        }
     }
 
     private static class UserProfile {
@@ -83,24 +304,24 @@ public class profileController implements Initializable {
 
     private java.util.List<GameHistory> getGameHistory(int userId) throws SQLException {
         java.util.List<GameHistory> list = new java.util.ArrayList<>();
-        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/spycrew", "root", "Hasnat");
-        PreparedStatement ps = conn.prepareStatement(
-                "SELECT id, game_result, points_gained, played_at FROM game_history WHERE user_id = ? ORDER BY played_at DESC"
-        );
-        ps.setInt(1, userId);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            list.add(new GameHistory(
-                    rs.getInt("id"),
-                    rs.getString("game_result"),
-                    rs.getInt("points_gained"),
-                    rs.getTimestamp("played_at")
-            ));
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                    "SELECT id, game_result, points_gained, played_at FROM game_history WHERE user_id = ? ORDER BY played_at DESC"
+            );
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new GameHistory(
+                        rs.getInt("id"),
+                        rs.getString("game_result"),
+                        rs.getInt("points_gained"),
+                        rs.getTimestamp("played_at")
+                ));
+            }
+            rs.close();
+            ps.close();
+            return list;
         }
-        rs.close();
-        ps.close();
-        conn.close();
-        return list;
     }
 
     private static class GameHistory {
@@ -116,8 +337,38 @@ public class profileController implements Initializable {
         }
     }
 
-    // Your startGame logic (unchanged)
-    private void startGame() {
-        // Implement your game start logic here
+    private java.util.List<RoomPlayer> getRoomPlayers(int roomId) throws SQLException {
+        java.util.List<RoomPlayer> list = new java.util.ArrayList<>();
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                    "SELECT u.username FROM room_players rp JOIN users u ON rp.user_id = u.id WHERE rp.room_id = ?"
+            );
+            ps.setInt(1, roomId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(new RoomPlayer(rs.getString("username")));
+            }
+            rs.close();
+            ps.close();
+            return list;
+        }
+    }
+
+    private static class RoomPlayer {
+        String username;
+        public RoomPlayer(String username) {
+            this.username = username;
+        }
+    }
+
+    // DB connection utility - update with your credentials
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/spycrew", "root", "Hasnat");
+    }
+
+    private void showAlert(String title, String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, msg);
+        alert.setTitle(title);
+        alert.showAndWait();
     }
 }
