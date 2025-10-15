@@ -88,28 +88,27 @@ public static void login(ActionEvent event,String username, String password) thr
     // Change Scene
 
 
-    static void changeScene(ActionEvent event, String fxmlFile , String username,String fame) {
-        Parent root = null;
-        if (fame != null && username != null) {
-            try {
-                FXMLLoader loader = new FXMLLoader(utils.class.getResource(fxmlFile));
-                root = loader.load();
+    static void changeScene(ActionEvent event, String fxmlFile, String username, String fame) {
+        try {
+            FXMLLoader loader = new FXMLLoader(utils.class.getResource(fxmlFile));
+            Parent root = loader.load();
 
-            } catch (IOException e) {
-                e.printStackTrace();
+            // Pass username to profileController if applicable
+            if (username != null && fxmlFile.equals("/main/profile.fxml")) {
+                Object controller = loader.getController();
+                if (controller instanceof main.profileController) {
+                    ((main.profileController) controller).setUsername(username);
+                }
             }
-        } else {
-            try {
-                root = FXMLLoader.load(utils.class.getResource(fxmlFile));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root, 850, 470));
+            stage.setTitle("SpyCrew");
+            stage.setResizable(false);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        Stage stage=(Stage) ((Node)event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root,850,470));
-        stage.setTitle("SpyCrew");
-        stage.setResizable(false);
-        stage.show();
     }
 
 }

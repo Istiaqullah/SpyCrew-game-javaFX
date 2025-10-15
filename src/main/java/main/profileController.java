@@ -40,29 +40,60 @@ public class profileController implements Initializable {
     @FXML
     private Label roomKeyDisplay;
 
-    private int playerId = 1; // You should set this from your login/session logic
+    // These fields will be set after login, not hardcoded anymore
+    private Integer playerId = null;
+    private String username = null;
+
     private Integer roomId = null;
     private String currentRoomKey = "";
     private Integer roomCreatorId = null;
     private Timeline pollingTimeline;
 
+    // This method will be called by utils.changeScene after login
+    public void setUsername(String username) {
+        this.username = username;
+        // Fetch playerId and points from DB based on username
+        try (Connection conn = getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT id, score FROM users WHERE username = ?");
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                this.playerId = rs.getInt("id");
+                int accountPoints = rs.getInt("score");
+                if (name != null) {
+                    name.setText("Name: " + username);
+                }
+                if (point != null) {
+                    point.setText("Point: " + accountPoints);
+                }
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Only fetch profile if username/playerId is set
         try {
-            UserProfile profile = getUserProfile(playerId);
-            if (profile != null) {
-                name.setText("Name: " + profile.username);
-                point.setText("Point: " + profile.score);
-            }
+            if (playerId != null) {
+                UserProfile profile = getUserProfile(playerId);
+                if (profile != null) {
+                    name.setText("Name: " + profile.username);
+                    point.setText("Point: " + profile.score);
+                }
 
-            historyVBox.getChildren().clear();
-            for (GameHistory gh : getGameHistory(playerId)) {
-                Label historyLabel = new Label(
-                        "Game #" + gh.id + " | Result: " + gh.gameResult +
-                                " | Points: " + gh.pointsGained +
-                                " | Date: " + gh.playedAt
-                );
-                historyVBox.getChildren().add(historyLabel);
+                historyVBox.getChildren().clear();
+                for (GameHistory gh : getGameHistory(playerId)) {
+                    Label historyLabel = new Label(
+                            "Game #" + gh.id + " | Result: " + gh.gameResult +
+                                    " | Points: " + gh.pointsGained +
+                                    " | Date: " + gh.playedAt
+                    );
+                    historyVBox.getChildren().add(historyLabel);
+                }
             }
 
             roomVBox.getChildren().clear();
@@ -361,7 +392,7 @@ public class profileController implements Initializable {
         }
     }
 
-    // DB connection utility - update with your credentials
+    // Helper to get connection
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/spycrew", "root", "Hasnat");
     }
@@ -372,3 +403,4 @@ public class profileController implements Initializable {
         alert.showAndWait();
     }
 }
+

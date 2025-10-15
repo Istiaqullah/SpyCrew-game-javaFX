@@ -12,4 +12,6 @@ module Log{
     exports Log;
     exports main;
     opens main to javafx.fxml;
+    opens MiniGame1 to javafx.fxml;
+    exports  MiniGame1;
 }
