@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.GridPane?>
+
+<GridPane fx:id="gridPane" xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="MiniGame1.TicTacToeController"
+          hgap="5" vgap="5" alignment="CENTER" >
+
+    <Button fx:id="btn00" text=" " GridPane.rowIndex="0" GridPane.columnIndex="0" prefWidth="100" prefHeight="100" />
+    <Button fx:id="btn01" text=" " GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="100" prefHeight="100" />
+    <Button fx:id="btn02" text=" " GridPane.rowIndex="0" GridPane.columnIndex="2" prefWidth="100" prefHeight="100" />
+
+    <Button fx:id="btn10" text=" " GridPane.rowIndex="1" GridPane.columnIndex="0" prefWidth="100" prefHeight="100" />
+    <Button fx:id="btn11" text=" " GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="100" prefHeight="100" />
+    <Button fx:id="btn12" text=" " GridPane.rowIndex="1" GridPane.columnIndex="2" prefWidth="100" prefHeight="100" />
+
+    <Button fx:id="btn20" text=" " GridPane.rowIndex="2" GridPane.columnIndex="0" prefWidth="100" prefHeight="100" />
+    <Button fx:id="btn21" text=" " GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="100" prefHeight="100" />
+    <Button fx:id="btn22" text=" " GridPane.rowIndex="2" GridPane.columnIndex="2" prefWidth="100" prefHeight="100" />
+
+</GridPane>
