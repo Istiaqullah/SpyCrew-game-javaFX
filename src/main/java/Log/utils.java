@@ -16,78 +16,117 @@ public class utils {
     private static final String URL = "jdbc:mysql://127.0.0.1:3306/spycrew";
     private static final String USER = "root";
     private static final String PASSWORD = "Hasnat";
+
     // Sign Up
     public static void signup(ActionEvent event,String username, String email, String password) throws SQLException {
-       Connection conn = null;
-       PreparedStatement insert = null;
-       PreparedStatement exists = null;
-         ResultSet resultSet = null;
-         try {
-                conn = DriverManager.getConnection(URL, USER, PASSWORD);
-                String checkQuery = "SELECT * FROM users WHERE username = ? OR email = ?";
-                exists = conn.prepareStatement(checkQuery);
-                exists.setString(1, username);
-                exists.setString(2, email);
-                resultSet = exists.executeQuery();
-                if (resultSet.next()) {
-                    System.out.println("Username or Email already exists.");
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("Username or Email already exists.");
-                    alert.show();
+        Connection conn = null;
+        PreparedStatement insert = null;
+        PreparedStatement exists = null;
+        ResultSet resultSet = null;
+        try {
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            String checkQuery = "SELECT * FROM users WHERE username = ? OR email = ?";
+            exists = conn.prepareStatement(checkQuery);
+            exists.setString(1, username);
+            exists.setString(2, email);
+            resultSet = exists.executeQuery();
+            if (resultSet.next()) {
+                System.out.println("Username or Email already exists.");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("Username or Email already exists.");
+                alert.show();
 
-                } else {
-                    String insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-                    insert = conn.prepareStatement(insertQuery);
-                    insert.setString(1, username);
-                    insert.setString(2, email);
-                    insert.setString(3, password);
-                    insert.executeUpdate();
-                    System.out.println("User registered.");
-                    changeScene(event ,"/main/profile.fxml",username,null);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                if (resultSet != null) resultSet.close();
-                if (exists != null) exists.close();
-                if (insert != null) insert.close();
-                if (conn != null) conn.close();
-         }
-    }
-
-public static void login(ActionEvent event,String username, String password) throws SQLException {
-
-    Connection conn = null;
-    PreparedStatement exists = null;
-    ResultSet resultSet = null;
-    try {
-        conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        String checkQuery = "SELECT * FROM users WHERE username = ? AND password = ? ";
-        exists = conn.prepareStatement(checkQuery);
-        exists.setString(1, username);
-        exists.setString(2, password);
-        resultSet = exists.executeQuery();
-        if (resultSet.next()) {
-            System.out.println("Login successful.");
-            changeScene(event ,"/main/profile.fxml",username,null );
-        } else {
-            System.out.println("Invalid username or password.");
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Invalid username or password.");
-            alert.show();
+            } else {
+                String insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+                insert = conn.prepareStatement(insertQuery);
+                insert.setString(1, username);
+                insert.setString(2, email);
+                insert.setString(3, password);
+                insert.executeUpdate();
+                System.out.println("User registered.");
+                changeScene(event ,"/main/profile.fxml",username,null);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (resultSet != null) resultSet.close();
+            if (exists != null) exists.close();
+            if (insert != null) insert.close();
+            if (conn != null) conn.close();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    } finally {
-        if (resultSet != null) resultSet.close();
-        if (exists != null) exists.close();
-        if (conn != null) conn.close();
     }
-}
+
+    // Login
+    public static void login(ActionEvent event,String username, String password) throws SQLException {
+
+        Connection conn = null;
+        PreparedStatement exists = null;
+        ResultSet resultSet = null;
+        try {
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            String checkQuery = "SELECT * FROM users WHERE username = ? AND password = ? ";
+            exists = conn.prepareStatement(checkQuery);
+            exists.setString(1, username);
+            exists.setString(2, password);
+            resultSet = exists.executeQuery();
+            if (resultSet.next()) {
+                System.out.println("Login successful.");
+                changeScene(event ,"/main/profile.fxml",username,null );
+            } else {
+                System.out.println("Invalid username or password.");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("Invalid username or password.");
+                alert.show();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (resultSet != null) resultSet.close();
+            if (exists != null) exists.close();
+            if (conn != null) conn.close();
+        }
+    }
+
+    // Forgot Password
+    public static void forgot(ActionEvent event, String email, String newPassword) throws SQLException {
+        Connection conn = null;
+        PreparedStatement update = null;
+        PreparedStatement exists = null;
+        ResultSet resultSet = null;
+        try {
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            String checkQuery = "SELECT * FROM users WHERE email = ?";
+            exists = conn.prepareStatement(checkQuery);
+            exists.setString(1, email);
+            resultSet = exists.executeQuery();
+            if (resultSet.next()) {
+                String updateQuery = "UPDATE users SET password = ? WHERE email = ?";
+                update = conn.prepareStatement(updateQuery);
+                update.setString(1, newPassword);
+                update.setString(2, email);
+                update.executeUpdate();
+                System.out.println("Password updated successfully.");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setContentText("Password updated successfully. Please login with your new password.");
+                alert.show();
+                changeScene(event, "login.fxml", null, null);
+            } else {
+                System.out.println("Email not found.");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("Email not found.");
+                alert.show();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (resultSet != null) resultSet.close();
+            if (exists != null) exists.close();
+            if (update != null) update.close();
+            if (conn != null) conn.close();
+        }
+    }
 
     // Change Scene
-
-
     static void changeScene(ActionEvent event, String fxmlFile, String username, String fame) {
         try {
             FXMLLoader loader = new FXMLLoader(utils.class.getResource(fxmlFile));
@@ -110,5 +149,4 @@ public static void login(ActionEvent event,String username, String password) thr
             e.printStackTrace();
         }
     }
-
 }

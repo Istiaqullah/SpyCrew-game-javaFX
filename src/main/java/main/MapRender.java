@@ -14,8 +14,8 @@ public class MapRender {
     private Image[] tileImages;
 
     public MapRender() {
-        tileImages = new Image[23];
-        for (int i = 0; i < 23; i++) {
+        tileImages = new Image[26];
+        for (int i = 0; i < 26; i++) {
             tileImages[i] = new Image(getClass().getResourceAsStream("/img/Map/tile_" + i + ".png"));
         }
     }

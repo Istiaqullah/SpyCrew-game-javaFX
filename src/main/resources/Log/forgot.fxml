@@ -21,13 +21,13 @@
                 <Font size="20.0" />
             </font>
         </Label>
-        <Button fx:id="btn_signUp" layoutX="340.0" layoutY="382.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="153.0" style="-fx-cursor: hand;" text="Submit">
+        <Button layoutX="340.0" layoutY="382.0" mnemonicParsing="false" onAction="#submit" prefHeight="27.0" prefWidth="153.0" style="-fx-cursor: hand;" text="Submit">
             <font>
                 <Font size="13.0" />
             </font>
         </Button>
-        <TextField fx:id="mail" layoutX="340.0" layoutY="291.0" promptText="example@gmail.com" />
-        <Label layoutX="245.0" layoutY="293.0" text="E-mail" textFill="WHITE">
+        <TextField fx:id="mail" layoutX="340.0" layoutY="281.0" promptText="example@gmail.com" />
+        <Label layoutX="245.0" layoutY="283.0" text="E-mail" textFill="WHITE">
             <font>
                 <Font size="15.0" />
             </font>
@@ -37,7 +37,6 @@
                 <Font size="13.0" />
             </font>
         </Button>
-        <Label fx:id="massage" layoutX="340.0" layoutY="350.0" prefHeight="25.0" prefWidth="153.0" textFill="RED" />
         <ImageView fitHeight="201.0" fitWidth="177.0" layoutX="326.0" layoutY="33.0" pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@../img/logo.png" />
@@ -48,5 +47,7 @@
             <Font size="15.0" />
          </font>
       </Label>
+      <Label layoutX="245.0" layoutY="321.0" text="New password" textFill="WHITE" />
+      <TextField fx:id="newPassword" layoutX="340.0" layoutY="317.0" promptText="now password" />
     </children>
 </AnchorPane>

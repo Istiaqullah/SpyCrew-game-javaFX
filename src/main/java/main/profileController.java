@@ -14,6 +14,8 @@ import javafx.util.Duration;
 
 import java.net.URL;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
@@ -286,6 +288,15 @@ public class profileController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/main/game.fxml"));
             Parent gameRoot = loader.load();
+            GameController gameController = loader.getController();
+
+            // Get room player names
+            List<String> names = new ArrayList<>();
+            for (RoomPlayer rp : getRoomPlayers(roomId)) {
+                names.add(rp.username);
+            }
+            gameController.setPlayerNames(names);
+
             Stage stage = (Stage) name.getScene().getWindow();
             Scene gameScene = new Scene(gameRoot, 368, 368);
             gameRoot.requestFocus();
@@ -403,4 +414,3 @@ public class profileController implements Initializable {
         alert.showAndWait();
     }
 }
-
