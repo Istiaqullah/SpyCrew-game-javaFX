@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -19,6 +20,8 @@ import javafx.stage.Stage;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Movement {
 
@@ -45,11 +48,14 @@ public class Movement {
     private final int tile10Value = 10;
     private final int tile21Value = 21;
     private final int tile24Value = 24;
+    private final int tile6Value = 6; // tile_6 for 2-point bonus
+    private final int tileBrickBreaker = 26; // tile_26 for Brick Breaker
 
     private final int tileTeleport = 3;
     private final int tileMiniGame = 14;
     private final int tileKey = 23; // tile_23 is the key tile
     private final int tileMemoryGame = 25; // tile_25 is memory game
+    private final int tileCarDodge = 27; // tile_27 for Car Dodge mini-game
 
     private Camera camera;
     private MapRender mapRenderer;
@@ -68,6 +74,9 @@ public class Movement {
 
     private int points = 0;
     private boolean hasKey = false;
+
+    // Set to store claimed tile_6 positions for this player
+    private final Set<String> claimedTile6Set = new HashSet<>();
 
     public static void setMap(int[][] newMap) {
         map = newMap;
@@ -189,6 +198,75 @@ public class Movement {
             updateKeyLabel();
         } else if (currentTile == tileMemoryGame) {
             launchMemoryGameAndUpdatePoints();
+        } else if (currentTile == tile6Value) {
+            String tileKey = playerX + "," + playerY;
+            if (!claimedTile6Set.contains(tileKey)) {
+                claimedTile6Set.add(tileKey);
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Points Awarded");
+                    alert.setHeaderText(null);
+                    alert.setContentText("You got 2 points!");
+                    alert.showAndWait();
+                });
+                points += 2;
+                updatePointLabel();
+                if (currentUsername != null && !currentUsername.isBlank()) {
+                    updatePointsInDatabase(currentUsername, 2);
+                }
+            } else {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Already Claimed");
+                    alert.setHeaderText(null);
+                    alert.setContentText("You already claimed this chest!");
+                    alert.showAndWait();
+                });
+            }
+        } else if (currentTile == tileBrickBreaker) {
+            // Launch Brick Breaker mini-game in a new thread
+            new Thread(() -> {
+                try {
+                    Platform.runLater(() -> {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MiniGame3/brickbreaker-view.fxml"));
+                            Parent root = loader.load();
+                            Stage stage = new Stage();
+                            stage.setScene(new Scene(root));
+                            stage.setTitle("Brick Breaker");
+                            stage.initModality(Modality.APPLICATION_MODAL);
+                            stage.showAndWait();
+                            // TODO: If you want to award points based on game result,
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        } else if (currentTile == tileCarDodge) {
+            // Launch Car Dodge mini-game in a new thread
+            new Thread(() -> {
+                try {
+                    Platform.runLater(() -> {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MiniGame4/car-dodge-view.fxml"));
+                            Parent root = loader.load();
+                            Stage stage = new Stage();
+                            stage.setScene(new Scene(root, 300, 600));
+                            stage.setTitle("Car Dodge Game 🚗");
+                            stage.initModality(Modality.APPLICATION_MODAL);
+                            stage.showAndWait();
+                            // If you want to get score from CarDodgeController, add code here
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
         }
     }
 

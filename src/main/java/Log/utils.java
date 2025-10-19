@@ -131,8 +131,6 @@ public class utils {
         try {
             FXMLLoader loader = new FXMLLoader(utils.class.getResource(fxmlFile));
             Parent root = loader.load();
-
-            // Pass username to profileController if applicable
             if (username != null && fxmlFile.equals("/main/profile.fxml")) {
                 Object controller = loader.getController();
                 if (controller instanceof main.profileController) {

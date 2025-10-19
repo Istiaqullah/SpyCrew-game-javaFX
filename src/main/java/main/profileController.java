@@ -294,7 +294,7 @@ public class profileController implements Initializable {
             stage.setTitle("SpyCrew");
             stage.show();
         } catch (Exception e) {
-            showAlert("Error", "Failed to switch to game scene: " + e.getMessage());
+           // showAlert("Error", "Failed to switch to game scene: " + e.getMessage());
         }
     }
 

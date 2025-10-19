@@ -11,7 +11,7 @@ public class RunningAnimation {
 
     private ImageView runner;
     private Timeline timeline;
-    private int frame = 0;// 0 or 1 to toggle between two frames
+    private int frame = 0;
     private KeyCode currentDirection = null;
 
     private final Image imgup1 = new Image("file:src/main/resources/img/Player/up_1.png");

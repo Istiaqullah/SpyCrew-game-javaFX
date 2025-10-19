@@ -55,10 +55,10 @@ public class GameController implements Initializable {
     }
 
     private void updateLabels() {
-        if (name1 != null) name1.setText((playerNames != null && playerNames.size() > 0 && playerNames.get(0) != null) ? playerNames.get(0) : "BOOT");
-        if (name2 != null) name2.setText((playerNames != null && playerNames.size() > 1 && playerNames.get(1) != null) ? playerNames.get(1) : "BOOT");
-        if (name3 != null) name3.setText((playerNames != null && playerNames.size() > 2 && playerNames.get(2) != null) ? playerNames.get(2) : "BOOT");
-        if (name4 != null) name4.setText((playerNames != null && playerNames.size() > 3 && playerNames.get(3) != null) ? playerNames.get(3) : "BOOT");
+        if (name1 != null) name1.setText((playerNames != null && playerNames.size() > 0 && playerNames.get(0) != null) ? playerNames.get(0) : "Hasnat");
+        if (name2 != null) name2.setText((playerNames != null && playerNames.size() > 1 && playerNames.get(1) != null) ? playerNames.get(1) : "Hasnat");
+        if (name3 != null) name3.setText((playerNames != null && playerNames.size() > 2 && playerNames.get(2) != null) ? playerNames.get(2) : "Hasnat");
+        if (name4 != null) name4.setText((playerNames != null && playerNames.size() > 3 && playerNames.get(3) != null) ? playerNames.get(3) : "Hasnat");
 
         if (point1 != null) point1.setText("Point: " + points[0]);
         if (key1 != null) key1.setText("Key: " + (keys[0] ? "Yes" : "No"));
@@ -95,24 +95,25 @@ public class GameController implements Initializable {
         Camera camera1 = new Camera(cameraWidth, cameraHeight, map[0].length, map.length, tileSize);
         movements[0].RunRun(image1, root, name1, mapRender, camera1, initialPlayerX, initialPlayerY, this, 0);
         // SET THE USERNAME FOR PLAYER 1!
-        movements[0].setUsername("player1_username"); // replace with actual username
+        movements[0].setUsername("player1_username");
 
         movements[1] = new Movement();
         Camera camera2 = new Camera(cameraWidth, cameraHeight, map[0].length, map.length, tileSize);
         movements[1].RunRun(image2, root, name2, mapRender, camera2, initialPlayerX, initialPlayerY, this, 1);
         // SET THE USERNAME FOR PLAYER 2!
-        movements[1].setUsername("player2_username"); // replace with actual username
+        movements[1].setUsername("player2_username");
 
         movements[2] = new Movement();
         Camera camera3 = new Camera(cameraWidth, cameraHeight, map[0].length, map.length, tileSize);
         movements[2].RunRun(image3, root, name3, mapRender, camera3, initialPlayerX, initialPlayerY, this, 2);
         // SET THE USERNAME FOR PLAYER 3!
-        movements[2].setUsername("player3_username"); // replace with actual username
+        movements[2].setUsername("player3_username");
 
         movements[3] = new Movement();
         Camera camera4 = new Camera(cameraWidth, cameraHeight, map[0].length, map.length, tileSize);
         movements[3].RunRun(image4, root, name4, mapRender, camera4, initialPlayerX, initialPlayerY, this, 3);
         // SET THE USERNAME FOR PLAYER 4!
-        movements[3].setUsername("player4_username"); // replace with actual username
+        movements[3].setUsername("player4_username");
     }
 }
+

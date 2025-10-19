@@ -13,7 +13,7 @@ public class Game extends Application {
         Parent root = fxmlLoader.load();
         stage.setTitle("SpyCrew");
         stage.setScene(new Scene(root, 368, 368));
-        root.requestFocus(); // Set focus to the root node (it can receive key events)
+        root.requestFocus(); //it can receive key events
         stage.show();
 
     }

@@ -7,9 +7,9 @@ import javafx.scene.control.TextField;
 
 public class forgotController {
     @FXML
-    private TextField mail; // fx:id="mail" in FXML
+    private TextField mail;
     @FXML
-    private TextField newPassword; // fx:id="newPassword" in FXML
+    private TextField newPassword;
 
     @FXML
     void logIn(ActionEvent event) {
