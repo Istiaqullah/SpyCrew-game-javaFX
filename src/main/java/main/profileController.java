@@ -42,7 +42,6 @@ public class profileController implements Initializable {
     @FXML
     private Label roomKeyDisplay;
 
-    // These fields will be set after login, not hardcoded anymore
     private Integer playerId = null;
     private String username = null;
 
@@ -51,10 +50,8 @@ public class profileController implements Initializable {
     private Integer roomCreatorId = null;
     private Timeline pollingTimeline;
 
-    // This method will be called by utils.changeScene after login
     public void setUsername(String username) {
         this.username = username;
-        // Fetch playerId and points from DB based on username
         try (Connection conn = getConnection()) {
             PreparedStatement ps = conn.prepareStatement("SELECT id, score FROM users WHERE username = ?");
             ps.setString(1, username);
@@ -78,7 +75,6 @@ public class profileController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Only fetch profile if username/playerId is set
         try {
             if (playerId != null) {
                 UserProfile profile = getUserProfile(playerId);
@@ -86,7 +82,6 @@ public class profileController implements Initializable {
                     name.setText("Name: " + profile.username);
                     point.setText("Point: " + profile.score);
                 }
-
                 historyVBox.getChildren().clear();
                 for (GameHistory gh : getGameHistory(playerId)) {
                     Label historyLabel = new Label(
@@ -114,7 +109,6 @@ public class profileController implements Initializable {
             leaveRoomButton.setOnAction(e -> leaveRoom());
             startButton.setOnAction(e -> startGame());
 
-            // Start polling for game start if in a room
             startPollingForGameStart();
 
         } catch (SQLException e) {
@@ -122,10 +116,8 @@ public class profileController implements Initializable {
         }
     }
 
-    // ------------------ Room Management Methods ---------------------
-
     private void createRoom() {
-        String roomKey = UUID.randomUUID().toString().substring(0, 8); // short random key
+        String roomKey = UUID.randomUUID().toString().substring(0, 8);
         try (Connection conn = getConnection()) {
             PreparedStatement ps = conn.prepareStatement("INSERT INTO rooms (room_key, creator_id) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, roomKey);
@@ -242,7 +234,6 @@ public class profileController implements Initializable {
         }
     }
 
-    // ------------- Polling for Game Start -------------
     private void startPollingForGameStart() {
         if (pollingTimeline != null) {
             pollingTimeline.stop();
@@ -290,7 +281,6 @@ public class profileController implements Initializable {
             Parent gameRoot = loader.load();
             GameController gameController = loader.getController();
 
-            // Get room player names
             List<String> names = new ArrayList<>();
             for (RoomPlayer rp : getRoomPlayers(roomId)) {
                 names.add(rp.username);
@@ -304,7 +294,7 @@ public class profileController implements Initializable {
             stage.setTitle("SpyCrew");
             stage.show();
         } catch (Exception e) {
-            //showAlert("Error", "Failed to switch to game scene: " + e.getMessage());
+            showAlert("Error", "Failed to switch to game scene: " + e.getMessage());
         }
     }
 
@@ -317,8 +307,6 @@ public class profileController implements Initializable {
             }
         }
     }
-
-    // --------------- Helper Methods -------------------
 
     private UserProfile getUserProfile(int userId) throws SQLException {
         try (Connection conn = getConnection()) {
@@ -344,8 +332,8 @@ public class profileController implements Initializable {
         }
     }
 
-    private java.util.List<GameHistory> getGameHistory(int userId) throws SQLException {
-        java.util.List<GameHistory> list = new java.util.ArrayList<>();
+    private List<GameHistory> getGameHistory(int userId) throws SQLException {
+        List<GameHistory> list = new ArrayList<>();
         try (Connection conn = getConnection()) {
             PreparedStatement ps = conn.prepareStatement(
                     "SELECT id, game_result, points_gained, played_at FROM game_history WHERE user_id = ? ORDER BY played_at DESC"
@@ -379,8 +367,8 @@ public class profileController implements Initializable {
         }
     }
 
-    private java.util.List<RoomPlayer> getRoomPlayers(int roomId) throws SQLException {
-        java.util.List<RoomPlayer> list = new java.util.ArrayList<>();
+    private List<RoomPlayer> getRoomPlayers(int roomId) throws SQLException {
+        List<RoomPlayer> list = new ArrayList<>();
         try (Connection conn = getConnection()) {
             PreparedStatement ps = conn.prepareStatement(
                     "SELECT u.username FROM room_players rp JOIN users u ON rp.user_id = u.id WHERE rp.room_id = ?"
@@ -403,7 +391,6 @@ public class profileController implements Initializable {
         }
     }
 
-    // Helper to get connection
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:mysql://localhost:3306/spycrew", "root", "Hasnat");
     }

@@ -20,9 +20,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
-/**
- * Handles player movement, camera updates, map redrawing, and interactions (teleportation / minigame / key pickup).
- */
 public class Movement {
 
     private final BooleanProperty wPressed = new SimpleBooleanProperty();
@@ -43,29 +40,34 @@ public class Movement {
     private static int[][] map;
     private final int defaultTileSize = 32;
 
-    // Values representing impassable tiles (from your original code)
     private final int tile0Value = 0;
     private final int tile9Value = 9;
     private final int tile10Value = 10;
     private final int tile21Value = 21;
+    private final int tile24Value = 24;
 
     private final int tileTeleport = 3;
     private final int tileMiniGame = 14;
     private final int tileKey = 23; // tile_23 is the key tile
+    private final int tileMemoryGame = 25; // tile_25 is memory game
 
     private Camera camera;
     private MapRender mapRenderer;
 
     private int playerX, playerY;
-    private String currentUsername = null; // Can be set from outside via setUsername(...)
+    private String currentUsername = null; // Must be set for DB update!
 
     private Teleportation teleportation;
 
     private final long moveDelayNanos = 100_000_000;
     private long lastMoveTime = 0;
 
-    // Reference to GameController so we can notify it of key pickup
     private GameController gameController = null;
+
+    private int playerIndex = 0;
+
+    private int points = 0;
+    private boolean hasKey = false;
 
     public static void setMap(int[][] newMap) {
         map = newMap;
@@ -75,11 +77,7 @@ public class Movement {
         this.currentUsername = username;
     }
 
-    /**
-     * Run the movement logic and wire input handlers.
-     * Note: added last parameter GameController to allow notifying the controller about pickups.
-     */
-    public void RunRun(ImageView player, AnchorPane scene, Label name, MapRender mapRenderer, Camera camera, int initialPlayerX, int initialPlayerY, GameController gameController) {
+    public void RunRun(ImageView player, AnchorPane scene, Label name, MapRender mapRenderer, Camera camera, int initialPlayerX, int initialPlayerY, GameController gameController, int playerIndex) {
         this.player = player;
         this.scene = scene;
         this.name = name;
@@ -88,6 +86,7 @@ public class Movement {
         this.playerX = initialPlayerX;
         this.playerY = initialPlayerY;
         this.gameController = gameController;
+        this.playerIndex = playerIndex;
 
         this.teleportation = new Teleportation(map);
 
@@ -97,13 +96,15 @@ public class Movement {
         camera.update(playerX, playerY);
         redrawMap();
 
-        // Ensure the anchor pane can receive keyboard focus so it receives key events
         Platform.runLater(() -> {
             if (scene != null) {
                 scene.setFocusTraversable(true);
                 scene.requestFocus();
             }
         });
+
+        updatePointLabel();
+        updateKeyLabel();
 
         movementTimer.start();
     }
@@ -119,16 +120,20 @@ public class Movement {
         if (map == null) return false;
         if (x < 0 || y < 0 || y >= map.length || x >= map[0].length) return false;
         int val = map[y][x];
-        return val != tile0Value && val != tile9Value && val != tile10Value && val != tile21Value;
+
+        if (val == tile0Value || val == tile9Value || val == tile10Value) {
+            return false;
+        }
+        if ((val == tile21Value || val == tile24Value)) {
+            return hasKey;
+        }
+        return true;
     }
 
     private void movementSetup() {
         if (scene == null) return;
 
-        // Ensure mouse click will focus the pane so key events deliver
-        scene.setOnMouseClicked(e -> {
-            scene.requestFocus();
-        });
+        scene.setOnMouseClicked(e -> scene.requestFocus());
 
         scene.setOnKeyPressed(e -> {
             boolean wasMoving = wPressed.get() || aPressed.get() || sPressed.get() || dPressed.get();
@@ -143,7 +148,6 @@ public class Movement {
                 if (runningAnimation != null) runningAnimation.startAnimation();
             }
 
-            // Interaction key (E) handling: teleportation, minigame, or key pickup depending on tile
             if (code == KeyCode.E) {
                 handleInteraction();
             }
@@ -169,7 +173,6 @@ public class Movement {
         int currentTile = map[playerY][playerX];
 
         if (currentTile == tileTeleport) {
-            // Teleportation: E pressed while standing on tile 3
             if (teleportation != null && teleportation.isOnTile3(playerX, playerY)) {
                 int[] newPos = teleportation.getRandomTeleportPosition(playerX, playerY);
                 if (newPos != null) {
@@ -180,14 +183,42 @@ public class Movement {
                 }
             }
         } else if (currentTile == tileMiniGame) {
-            // Launch mini-game and update points on result
             launchMiniGameAndUpdatePoints();
-        } else if (currentTile == tileKey) {
-            // Player picks up a key on tile_23
-            if (gameController != null) {
-                gameController.setKey(true);
-            }
+        } else if (currentTile == tileKey && !hasKey) {
+            hasKey = true;
+            updateKeyLabel();
+        } else if (currentTile == tileMemoryGame) {
+            launchMemoryGameAndUpdatePoints();
         }
+    }
+
+    private void launchMemoryGameAndUpdatePoints() {
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/MiniGame2/memory-view.fxml"));
+                Parent root = loader.load();
+                MiniGame2.MemoryGameController controller = loader.getController();
+                if (controller != null) {
+                    controller.setResultCallback(finalScore -> {
+                        points += finalScore;
+                        updatePointLabel();
+
+                        if (currentUsername == null || currentUsername.isBlank()) {
+                            System.out.println("Username not set — skipping points update. Points earned: " + finalScore);
+                        } else {
+                            updatePointsInDatabase(currentUsername, finalScore);
+                        }
+                    });
+                }
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root, 600, 650));
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setTitle("Memory Match Game 🧠");
+                stage.showAndWait();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 
     private final AnimationTimer movementTimer = new AnimationTimer() {
@@ -236,7 +267,6 @@ public class Movement {
         }
     };
 
-    // ---- MiniGame Integration ----
     private void launchMiniGameAndUpdatePoints() {
         Platform.runLater(() -> {
             try {
@@ -245,17 +275,19 @@ public class Movement {
                 MiniGame1.TicTacToeController controller = loader.getController();
                 if (controller != null) {
                     controller.setResultCallback(result -> {
-                        int points = switch (result) {
+                        int earned = switch (result) {
                             case "win" -> 4;
                             case "draw" -> 2;
                             case "loss" -> 0;
                             default -> 0;
                         };
-                        // Only update DB if username is set
+                        points += earned;
+                        updatePointLabel();
+
                         if (currentUsername == null || currentUsername.isBlank()) {
-                            System.out.println("Username not set — skipping points update. Points earned: " + points);
+                            System.out.println("Username not set — skipping points update. Points earned: " + earned);
                         } else {
-                            updatePointsInDatabase(currentUsername, points);
+                            updatePointsInDatabase(currentUsername, earned);
                         }
                     });
                 }
@@ -272,13 +304,24 @@ public class Movement {
         });
     }
 
+    private void updatePointLabel() {
+        if (gameController != null) {
+            gameController.setPlayerPoint(playerIndex, points);
+        }
+    }
+
+    private void updateKeyLabel() {
+        if (gameController != null) {
+            gameController.setPlayerKey(playerIndex, hasKey);
+        }
+    }
+
     private void updatePointsInDatabase(String username, int pointsToAdd) {
         if (username == null || username.isBlank()) {
             System.out.println("updatePointsInDatabase called with null/empty username; skipping DB update.");
             return;
         }
         System.out.println("Updating points for user: " + username + ", add: " + pointsToAdd);
-        // NOTE: Credentials are hardcoded here (as in original). Consider moving to config.
         String url = "jdbc:mysql://localhost:3306/spycrew";
         String user = "root";
         String pass = "Hasnat";
