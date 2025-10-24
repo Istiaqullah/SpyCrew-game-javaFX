@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="MiniGame2.MemoryGameController"
+
+            prefWidth="600" prefHeight="650"
+            style="-fx-background-color: linear-gradient(to bottom right, #0f172a, #1e293b);">
+
+    <top>
+        <HBox spacing="25" alignment="CENTER" style="-fx-padding: 20;">
+            <Label fx:id="scoreLabel" text="Score: 0" style="-fx-font-size: 20; -fx-text-fill: white;"/>
+            <Label fx:id="movesLabel" text="Moves: 0" style="-fx-font-size: 20; -fx-text-fill: white;"/>
+            <Button fx:id="restartButton" text="Restart" onAction="#restartGame"
+                    style="-fx-background-color: #22c55e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <GridPane fx:id="grid" hgap="12" vgap="12" alignment="CENTER" style="-fx-padding: 25;"/>
+    </center>
+
+</BorderPane>
