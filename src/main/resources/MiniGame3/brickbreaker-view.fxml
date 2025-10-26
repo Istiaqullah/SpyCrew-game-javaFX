@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="MiniGame3.BrickBreakerController"
+            prefWidth="700" prefHeight="500">
+
+    <Canvas fx:id="gameCanvas" width="700" height="500"/>
+</AnchorPane>
